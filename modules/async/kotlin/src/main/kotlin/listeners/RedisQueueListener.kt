@@ -3,30 +3,36 @@ package listeners
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.core.JsonProcessingException
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.lettuce.core.api.async.RedisAsyncCommands
+import io.lettuce.core.api.sync.RedisCommands
 import io.lettuce.core.json.JsonObject
 import jakarta.annotation.PostConstruct
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
+import kotlin.concurrent.thread
 
 @Component
-class QueueMessageEventListener(
-    private val asyncCommands: RedisAsyncCommands<String, String>,
+class RedisQueueListener(
+    private val commands: RedisCommands<String, String>,
     private val objectMapper: ObjectMapper)
 {
     val logger = KotlinLogging.logger {}
     private val queueKey = "benchmarkQueue"
-    private val pollingDelayMillis = 100L
 
     @PostConstruct
     fun startListening()
     {
-//        consumeMessages()
-//            .subscribe(
-//                { message -> logger.info { "Processed message: $message" } },
-//                { error -> logger.error(error) { "Error processing queue" } }
-//            )
+        thread(start = true)
+        {
+            while (true)
+            {
+                val message = commands.brpop(1, queueKey)
+                if (message != null)
+                {
+                    println("Consumed: ${message.value}")
+                }
+            }
+        }
     }
 
 //    private fun consumeMessages(): Flux<String>

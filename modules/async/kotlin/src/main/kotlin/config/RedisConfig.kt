@@ -5,6 +5,7 @@ import io.lettuce.core.RedisClient
 import io.lettuce.core.RedisURI
 import io.lettuce.core.api.StatefulRedisConnection
 import io.lettuce.core.api.async.RedisAsyncCommands
+import io.lettuce.core.api.sync.RedisCommands
 import io.lettuce.core.resource.ClientResources
 import io.lettuce.core.resource.DefaultClientResources
 import org.springframework.beans.factory.annotation.Value
@@ -68,5 +69,11 @@ class RedisConfig
     fun asyncCommands(connection: StatefulRedisConnection<String, String>): RedisAsyncCommands<String, String>
     {
         return connection.async()
+    }
+
+    @Bean
+    fun commands(connection: StatefulRedisConnection<String, String>): RedisCommands<String, String>
+    {
+        return connection.sync()
     }
 }
