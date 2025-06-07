@@ -5,9 +5,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.annotation.ComponentScan
+import org.springframework.scheduling.annotation.EnableScheduling
 
 @SpringBootApplication
-@ComponentScan("controllers")
+@EnableScheduling
+@ComponentScan("config", "controllers", "tasks", "listeners")
 class Application : SpringBootServletInitializer()
 
 val logger = KotlinLogging.logger {}

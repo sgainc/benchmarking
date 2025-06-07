@@ -25,7 +25,7 @@
 
 
     <springProfile name="local">
-        <root level="WARN">
+        <root level="DEBUG">
             <appender-ref ref="async-json"/>
         </root>
         <logger name="application" level="DEBUG"/>
@@ -34,7 +34,7 @@
     </springProfile>
 
     <springProfile name="default">
-        <root level="WARN">
+        <root level="INFO">
             <appender-ref ref="async-json"/>
         </root>
         <logger name="application" level="DEBUG"/>
@@ -43,7 +43,7 @@
     </springProfile>
 
     <springProfile name="dev">
-        <root level="WARN">
+        <root level="INFO">
             <appender-ref ref="async-json"/>
         </root>
         <logger name="application" level="DEBUG"/>
