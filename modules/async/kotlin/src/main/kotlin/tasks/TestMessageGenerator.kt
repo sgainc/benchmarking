@@ -44,10 +44,6 @@ class TestMessageGenerator(private val commands: RedisCommands<String, String>)
      * - Retrieves the size of the queue `benchmarkQueue` from the Redis data store.
      * - Outputs the queue size as an informational log message.
      *
-     * Scheduling Details:
-     * - Initial delay: 10,000 milliseconds (10 seconds) before the method runs for the first time.
-     * - Fixed rate: 60,000 milliseconds (1 minute) between consecutive executions.
-     *
      * Dependencies:
      * - Accesses the `commands` field to execute Redis operations.
      * - Uses the `logger` field to log the queue size.
@@ -68,17 +64,12 @@ class TestMessageGenerator(private val commands: RedisCommands<String, String>)
      * - If the queue size is below the threshold, generates the required number of test messages.
      * - Serializes each generated message into a JSON string and pushes it into the queue using the `lpush` command.
      *
-     * Scheduling Details:
-     * - The method is scheduled to run periodically.
-     * - Initial delay: 5000 milliseconds (5 seconds) before the method executes for the first time.
-     * - Fixed rate: 10000 milliseconds (10 seconds) between consecutive executions.
-     *
      * Dependencies:
      * - Utilizes the `commands` field to interact with the Redis data store.
      * - Employs the `mapper` field to serialize messages into JSON format.
      * - Uses the `logger` field to log information regarding the message generation process.
      */
-    @Scheduled(initialDelay = 5000, fixedRate = 10000)
+    @Scheduled(initialDelay = 5000, fixedRate = 2000)
     private fun generateMessage()
     {
         /* See how many messages are in the queue */
