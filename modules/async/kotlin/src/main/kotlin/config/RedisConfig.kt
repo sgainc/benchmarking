@@ -13,6 +13,20 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.time.Duration
 
+/**
+ * Configuration class for setting up Redis using Lettuce library.
+ * This class defines the beans required to connect, interact, and manage
+ * Redis server with both synchronous and asynchronous capabilities.
+ * It also configures customizable options such as host, port, password,
+ * database index, and additional connection settings.
+ *
+ * The following beans are defined:
+ * - `ClientResources`: Configures the client resource pool, including thread pool sizes.
+ * - `RedisClient`: Creates and configures the Redis client with URI and options.
+ * - `StatefulRedisConnection`: Establishes and maintains a connection to the Redis server.
+ * - `RedisAsyncCommands`: Provides access to asynchronous Redis commands.
+ * - `RedisCommands`: Provides access to synchronous Redis commands.
+ */
 @Configuration
 class RedisConfig
 {

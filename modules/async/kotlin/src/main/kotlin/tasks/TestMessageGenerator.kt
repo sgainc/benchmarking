@@ -17,6 +17,18 @@ import kotlin.random.Random
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
+/**
+ * A component class responsible for generating and queuing test messages in Redis.
+ * The messages consist of various message types, such as create, read, update, and delete,
+ * which are designed to test and benchmark the message-handling infrastructure.
+ *
+ * This class ensures that the Redis queue does not fall below a certain threshold of messages
+ * by automatically generating and pushing new messages to the queue at scheduled intervals.
+ *
+ * @constructor Instantiates the TestMessageGenerator using the provided Redis commands object for interacting with Redis.
+ *
+ * @property commands An instance of RedisCommands used to interact with the Redis database for queuing or retrieving messages.
+ */
 @Component
 class TestMessageGenerator(private val commands: RedisCommands<String, String>)
 {
@@ -43,6 +55,18 @@ class TestMessageGenerator(private val commands: RedisCommands<String, String>)
         }
     }
 
+    /**
+     * Generates a test message wrapped in a `MessageWrapper` object. The generated message can be one
+     * of the following types: `CreateDataMessage`, `ReadDataMessage`, `UpdateDataMessage`, or `DeleteDataMessage`.
+     * The type of message is determined randomly, and specific fields for the message are populated accordingly.
+     *
+     * Additional behavior:
+     * - If the internal `dataNameList` contains fewer than 100 items, a new `CreateDataMessage` is generated.
+     * - Otherwise, the message type is selected randomly with varying probabilities.
+     *
+     * @return A `MessageWrapper` object containing metadata such as the message type, timestamp, and
+     *         the corresponding message of type `BaseMessage`.
+     */
     private fun generateTestMessage() : MessageWrapper<BaseMessage>
     {
         /* If we don't have any data yet, add some */

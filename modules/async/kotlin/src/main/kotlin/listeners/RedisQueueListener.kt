@@ -14,7 +14,14 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import kotlin.concurrent.thread
 
-
+/**
+ * RedisQueueListener is a component that listens to messages published on a Redis queue
+ * and processes them asynchronously. It deserializes incoming messages, calculates latency,
+ * and logs relevant information.
+ *
+ * @property commands Connection interface for executing Redis commands.
+ * @property objectMapper ObjectMapper instance for JSON deserialization.
+ */
 @Component
 class RedisQueueListener(
     private val commands: RedisCommands<String, String>,
