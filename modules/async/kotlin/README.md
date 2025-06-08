@@ -54,4 +54,15 @@ $ bash ./gradlew bootRun --args='--spring.profiles.active=local'
 | `listeners`   | Contains event listeners                     |
 | `tasks`       | Contains classes that manage scheduled tasks |
  
+## Running in Docker/Compose
 
+Note - the tests are currently trying to connect to redis, so you will 
+likely need a redis server running during the build process. If you get a
+lettuce connetion closed error during building, it should work on a second try. 
+
+```
+$ ./gradlew build
+$ podman build -t async-bench-kotlin .
+$ podman compose build
+$ podman compose up
+```
