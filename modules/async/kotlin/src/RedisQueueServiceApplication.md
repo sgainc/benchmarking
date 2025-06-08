@@ -42,3 +42,16 @@ $ bash ./gradlew bootRun --args='--spring.profiles.active=local'
 | `spring.redis.password` | Redis password (optional) | |
 | `spring.redis.timeout` | Connection timeout (ms) | 2000 |
 
+## Folders
+
+| Folder        | Description                                  |
+|---------------|----------------------------------------------|
+| `application` | Contains the main applcation class           |
+| `config`      | Contains spring configuration classes        |
+| `controllers` | Contains spring web controllers              |
+| `data`        | Contains data access layers                  |
+| `dto`         | Contains data storage classes                |
+| `listeners`   | Contains event listeners                     |
+| `tasks`       | Contains classes that manage scheduled tasks |
+ 
+
