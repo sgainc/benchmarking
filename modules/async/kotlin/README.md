@@ -66,3 +66,19 @@ $ podman build -t async-bench-kotlin .
 $ podman compose build
 $ podman compose up
 ```
+
+## Deploy to ECR and Run on Fargate
+
+```
+$ export AWS_ACCESS_KEY_ID=[AWS_ACCESS_KEY_ID]
+$ export AWS_SECRET_ACCESS_KEY=[AWS_SECRET_ACCESS_KEY]
+$ export AWS_DEFAULT_REGION=us-east-1
+$ aws ecr get-login-password | podman login --username AWS --password-stdin 203422683116.dkr.ecr.us-east-1.amazonaws.com
+
+$ podman tag 1ec8184264ac 203422683116.dkr.ecr.us-east-1.amazonaws.com/nw2s-benchmarking:kotlin-0.0.1
+$ podman push 203422683116.dkr.ecr.us-east-1.amazonaws.com/nw2s-benchmarking:kotlin-0.0.1
+
+$ podman tag 328464a853ee 203422683116.dkr.ecr.us-east-1.amazonaws.com/nw2s-benchmarking:redis
+$ podman push 203422683116.dkr.ecr.us-east-1.amazonaws.com/nw2s-benchmarking:redis
+```
+

@@ -35,6 +35,8 @@ dependencies {
 	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+
+	implementation("software.amazon.awssdk:s3:2.31.59")
 }
 
 kotlin {
@@ -44,7 +46,7 @@ kotlin {
 }
 
 springBoot {
-	mainClass.set("application.ApplicationKt")
+	mainClass.set("application.Application")
 }
 
 tasks.withType<Test> {

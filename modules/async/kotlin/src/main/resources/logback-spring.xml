@@ -25,10 +25,15 @@
 
 
     <springProfile name="local">
-        <root level="DEBUG">
+        <root level="INFO">
             <appender-ref ref="async-json"/>
         </root>
         <logger name="application" level="DEBUG"/>
+        <logger name="data" level="DEBUG"/>
+        <logger name="dto" level="DEBUG"/>
+        <logger name="listeners" level="DEBUG"/>
+        <logger name="services" level="DEBUG"/>
+        <logger name="tasks" level="DEBUG"/>
         <logger name="controllers" level="DEBUG"/>
         <logger name="config" level="DEBUG"/>
     </springProfile>

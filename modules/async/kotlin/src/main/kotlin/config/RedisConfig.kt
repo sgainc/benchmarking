@@ -30,13 +30,13 @@ import java.time.Duration
 @Configuration
 class RedisConfig
 {
-    @Value("\${spring.redis.host:localhost}")
+    @Value("\${spring.data.redis.host:localhost}")
     private lateinit var host: String
 
-    @Value("\${spring.redis.port:6379}")
+    @Value("\${spring.data.redis.port:6379}")
     private var port: Int = 6379
 
-    @Value("\${spring.redis.password:}")
+    @Value("\${spring.data.redis.password:}")
     private lateinit var password: String
 
     private var database: Int = 0
