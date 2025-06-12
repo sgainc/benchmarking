@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Component
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
+import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 
@@ -73,12 +75,31 @@ class S3DataProvider(private val s3Client: S3Client)
      */
     fun getDataFile(filename: String): String
     {
-        val getObjectRequest = software.amazon.awssdk.services.s3.model.GetObjectRequest.builder()
+        val getObjectRequest = GetObjectRequest.builder()
             .bucket(bucketName)
             .key(filename)
 
         val response = s3Client.getObject(getObjectRequest.build())
+        val result = response.readAllBytes().decodeToString()
+        response.close()
 
-        return response.readAllBytes().decodeToString()
+        return result
+    }
+
+    /**
+     * Deletes a data file from the S3 bucket with the specified filename.
+     * This method initiates a request to remove the object from the S3 bucket and
+     * processes the deletion.
+     *
+     * @param filename The name of the file to be deleted from the S3 bucket.
+     */
+    fun deleteDataFile(filename: String)
+    {
+        val deleteObjectRequest = DeleteObjectRequest.builder()
+            .bucket(bucketName)
+            .key(filename)
+            .build()
+
+        s3Client.deleteObject(deleteObjectRequest)
     }
 }

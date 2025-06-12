@@ -37,6 +37,7 @@ dependencies {
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
 
 	implementation("software.amazon.awssdk:s3:2.31.59")
+	implementation("software.amazon.awssdk:netty-nio-client:2.31.62")
 }
 
 kotlin {
