@@ -40,12 +40,21 @@ class S3DataProvider(private val s3Client: S3Client, private val threadPoolExecu
     {
         val objectList = ArrayList<String>()
 
-        val listObjectsRequest = ListObjectsV2Request.builder().bucket(bucketName).build()
-        val listStream = s3Client.listObjectsV2(listObjectsRequest).contents().stream()
+        do
+        {
+            val listObjectsRequest = ListObjectsV2Request.builder().bucket(bucketName).build()
+            val listResponse = s3Client.listObjectsV2(listObjectsRequest)
 
-        listStream.forEach { objectList.add(it.key()) }
+            listResponse.contents().stream().forEach { objectList.add(it.key()) }
 
-        listStream.close()
+            /* If we are done, don't forget to close! */
+            if (!listResponse.isTruncated)
+            {
+                listResponse.contents().stream().close()
+            }
+        }
+        while(listResponse.isTruncated)
+
         return objectList
     }
 

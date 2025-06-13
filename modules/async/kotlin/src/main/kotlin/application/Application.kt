@@ -9,6 +9,7 @@ import org.springframework.context.annotation.ComponentScan
 import org.springframework.scheduling.annotation.EnableScheduling
 import software.amazon.awssdk.services.s3.endpoints.internal.Value
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * The main entry point for the Spring Boot application.
@@ -49,7 +50,7 @@ class Application : SpringBootServletInitializer()
 class ApplicationState
 {
 	var objectList = ConcurrentHashMap.newKeySet<String>()
-	var eventCount = 0L
-	var eventCountTimeStart = System.currentTimeMillis()
+	var eventCount : AtomicLong = AtomicLong(0)
+	var eventCountTimeStart : AtomicLong = AtomicLong(System.currentTimeMillis())
 }
 

@@ -116,6 +116,7 @@ class RedisQueueListener(
                     dataProvider.writeDataFile(createMessage.message.dataName, data)
 
                     logger.info { "Created new data file ${createMessage.message.dataName} size: ${createMessage.message.dataSize}" }
+                    state.eventCount.incrementAndGet()
                 }
                 MessageType.READ_MESSAGE ->
                 {
@@ -134,6 +135,7 @@ class RedisQueueListener(
                     val lineCount = data.count { it == '\n' }
 
                     logger.info { "Read file ${readMessage.message.dataName} size: ${lineCount}" }
+                    state.eventCount.incrementAndGet()
                 }
                 MessageType.UPDATE_MESSAGE ->
                 {
@@ -153,6 +155,7 @@ class RedisQueueListener(
                     dataProvider.writeDataFile(updateMessage.message.dataName, data)
 
                     logger.info { "Updated file ${updateMessage.message.dataName} size: ${data.length}" }
+                    state.eventCount.incrementAndGet()
                 }
                 MessageType.DELETE_MESSAGE ->
                 {
@@ -173,6 +176,7 @@ class RedisQueueListener(
                     dataProvider.deleteDataFile(deleteMessage.message.dataName)
 
                     logger.info { "Deleted file ${deleteMessage.message.dataName}" }
+                    state.eventCount.incrementAndGet()
                 }
             }
         }
