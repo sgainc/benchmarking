@@ -70,9 +70,6 @@ class RedisQueueListener(
                 val message = commands.brpop(1, queueKey)
                 if (message != null)
                 {
-                    //TODO: getting some key does not exist errors.
-                    /* Using Java Loom to spinup threads for handling the messages */
-                    //Thread.ofVirtual().start() { processMessage(message.value) }
                     processMessage(message.value)
                 }
             }

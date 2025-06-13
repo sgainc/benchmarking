@@ -49,5 +49,7 @@ class Application : SpringBootServletInitializer()
 class ApplicationState
 {
 	var objectList = ConcurrentHashMap.newKeySet<String>()
+	var eventCount = 0L
+	var eventCountTimeStart = System.currentTimeMillis()
 }
 

@@ -9,18 +9,21 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import java.util.concurrent.ThreadPoolExecutor
 
 @Component
-class S3DataProviderFactory(private val s3Client: S3Client)
+class S3DataProviderFactory(
+    private val s3Client: S3Client,
+    private val threadPoolExecutor: ThreadPoolExecutor)
 {
     @Bean
     fun getS3DataProvider(): S3DataProvider
     {
-        return S3DataProvider(s3Client)
+        return S3DataProvider(s3Client, threadPoolExecutor)
     }
 }
 
-class S3DataProvider(private val s3Client: S3Client)
+class S3DataProvider(private val s3Client: S3Client, private val threadPoolExecutor: ThreadPoolExecutor)
 {
     private val logger = KotlinLogging.logger {}
     private val bucketName = "nw2s-benchmark-data"
@@ -38,10 +41,11 @@ class S3DataProvider(private val s3Client: S3Client)
         val objectList = ArrayList<String>()
 
         val listObjectsRequest = ListObjectsV2Request.builder().bucket(bucketName).build()
-        s3Client.listObjectsV2(listObjectsRequest).contents().stream().forEach {
-            objectList.add(it.key())
-        }
+        val listStream = s3Client.listObjectsV2(listObjectsRequest).contents().stream()
 
+        listStream.forEach { objectList.add(it.key()) }
+
+        listStream.close()
         return objectList
     }
 
@@ -62,7 +66,7 @@ class S3DataProvider(private val s3Client: S3Client)
 
         val requestBody = RequestBody.fromString(data)
 
-        s3Client.putObject(putObjectRequest, requestBody)
+        threadPoolExecutor.submit { s3Client.putObject(putObjectRequest, requestBody) }
     }
 
     /**
@@ -100,6 +104,6 @@ class S3DataProvider(private val s3Client: S3Client)
             .key(filename)
             .build()
 
-        s3Client.deleteObject(deleteObjectRequest)
+        threadPoolExecutor.submit { s3Client.deleteObject(deleteObjectRequest) }
     }
 }

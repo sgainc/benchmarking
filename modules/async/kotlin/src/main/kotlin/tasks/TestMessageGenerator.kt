@@ -1,6 +1,5 @@
 package tasks
 
-import application.Application
 import application.ApplicationState
 import com.fasterxml.jackson.databind.ObjectMapper
 import data.S3DataProvider
@@ -96,15 +95,15 @@ class TestMessageGenerator(
      * - Employs the `mapper` field to serialize messages into JSON format.
      * - Uses the `logger` field to log information regarding the message generation process.
      */
-    @Scheduled(initialDelay = 5000, fixedRate = 2000)
+    @Scheduled(initialDelay = 3000, fixedRate = 500)
     private fun generateMessage()
     {
         /* See how many messages are in the queue */
         val queueSize = commands.llen("benchmarkQueue")
 
         /* If there are less than 1000 messages in the queue, generate as many as needed */
-        if (queueSize < 1000) {
-            val messagesToGenerate = 1000 - queueSize
+        if (queueSize < 100) {
+            val messagesToGenerate = 100 - queueSize
             logger.info { "Generating $messagesToGenerate test messages" }
 
             repeat(messagesToGenerate.toInt())
