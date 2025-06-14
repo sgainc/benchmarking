@@ -31,7 +31,7 @@ import java.util.UUID
  * @property commands An instance of RedisCommands used to interact with the Redis database for queuing or retrieving messages.
  */
 @Component
-class TestMessageGenerator(
+public open class TestMessageGenerator(
     private val commands: RedisCommands<String, String>,
     private val dataProvider: S3DataProvider,
     private val state: ApplicationState)
@@ -51,8 +51,8 @@ class TestMessageGenerator(
      * - Accesses the `dataProvider` field to retrieve the object list.
      * - Utilizes the `logger` field to log information related to the list update process.
      */
-    @Scheduled(initialDelay = 1000, fixedRate = 1000)
-    private fun updateObjectList()
+    @Scheduled(initialDelay = 5000, fixedRate = 1000)
+    public open fun updateObjectList()
     {
         /* Query the bucket for its list of files */
         val dataNameList = dataProvider.getObjectList()
@@ -75,7 +75,7 @@ class TestMessageGenerator(
      * - Uses the `logger` field to log the queue size.
      */
     @Scheduled(initialDelay = 10000, fixedRate = 60000)
-    private fun logQueueSize()
+    open fun logQueueSize()
     {
         val queueSize = commands.llen("benchmarkQueue")
         logger.info { "Current queue size: $queueSize" }
@@ -96,7 +96,7 @@ class TestMessageGenerator(
      * - Uses the `logger` field to log information regarding the message generation process.
      */
     @Scheduled(initialDelay = 3000, fixedRate = 500)
-    private fun generateMessage()
+    open fun generateMessage()
     {
         /* See how many messages are in the queue */
         val queueSize = commands.llen("benchmarkQueue")
@@ -126,7 +126,7 @@ class TestMessageGenerator(
      * @return A `MessageWrapper` object containing metadata such as the message type, timestamp, and
      *         the corresponding message of type `BaseMessage`.
      */
-    private fun generateTestMessage() : MessageWrapper<BaseMessage>
+    open fun generateTestMessage() : MessageWrapper<BaseMessage>
     {
         /* If we don't have any data yet, add some */
         if (state.objectList.size < 100)

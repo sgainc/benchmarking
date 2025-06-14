@@ -1,9 +1,9 @@
-package listeners
+package listeners.redis
 
 import application.ApplicationState
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
 import data.S3DataProvider
 import dto.BaseMessage
 import dto.CreateDataMessage
@@ -12,69 +12,40 @@ import dto.MessageWrapper
 import dto.ReadDataMessage
 import dto.UpdateDataMessage
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.lettuce.core.api.sync.RedisCommands
-import jakarta.annotation.PostConstruct
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import services.ProcessingService
-import kotlin.concurrent.thread
 
 /**
- * RedisQueueListener is a component that listens to messages published on a Redis queue
- * and processes them asynchronously. It deserializes incoming messages, calculates latency,
- * and logs relevant information.
+ * Handles the processing of messages received from a Redis queue. This class uses
+ * asynchronous processing to handle JSON messages of different types, executing
+ * respective actions such as create, read, update, and delete operations.
  *
- * @property commands Connection interface for executing Redis commands.
- * @property objectMapper ObjectMapper instance for JSON deserialization.
+ * The messages are expected to conform to specific types encoded as JSON strings,
+ * and their processing includes deserialization into corresponding message formats.
+ * Error scenarios during JSON processing or message handling are logged accordingly.
+ *
+ * The operations include:
+ * - Creating new data and saving it to the datastore.
+ * - Reading data from the datastore and logging metadata.
+ * - Updating existing data stored in the datastore.
+ * - Deleting data from the datastore and updating internal state.
+ *
+ * This handler also maintains state tracking and logs data-processing latencies.
+ *
+ * @property objectMapper Used for serializing and deserializing JSON messages.
+ * @property dataProvider Responsible for all data storage/retrieval operations from an S3 bucket.
+ * @property processingService Handles data generation, transformation, and manipulation logic.
+ * @property state Maintains the application's state, including event counts and file lists.
  */
 @Component
-class RedisQueueListener(
-    private val commands: RedisCommands<String, String>,
+class RedisQueueHandler(
     private val objectMapper: ObjectMapper,
     private val dataProvider: S3DataProvider,
     private val processingService: ProcessingService,
-    private val state: ApplicationState
-)
+    private val state: ApplicationState)
 {
     val logger = KotlinLogging.logger {}
-    private val queueKey = "benchmarkQueue"
-
-    /**
-     * Starts listening to a Redis queue for incoming messages and processes them asynchronously.
-     *
-     * This method runs a background thread that continuously polls a Redis queue using the BRPOP
-     * command with a timeout of 1 second. If a message is received, it is handled in a separate
-     * virtual thread for processing, ensuring efficient use of system resources.
-     * The `processMessage` function is used to handle the deserialization and processing of the
-     * received message.
-     *
-     * Potential message types include:
-     * - CREATE_MESSAGE: Handles creation of new data.
-     * - READ_MESSAGE: Handles reading data and counting lines.
-     * - UPDATE_MESSAGE: Handles updating and modifying data.
-     * - DELETE_MESSAGE: Handles deletion of data and related state cleanup.
-     *
-     * Errors during message deserialization or processing are logged.
-     *
-     * The method leverages Java Loom's virtual threads to scale processing efficiently for high-throughput scenarios.
-     *
-     * Note: This method is marked with `@PostConstruct`, meaning it is triggered automatically
-     * after the construction of the related bean and its dependencies.
-     */
-    @PostConstruct
-    fun startListening()
-    {
-        thread(start = true)
-        {
-            while (true)
-            {
-                val message = commands.brpop(1, queueKey)
-                if (message != null)
-                {
-                    processMessage(message.value)
-                }
-            }
-        }
-    }
 
     /**
      * Processes a JSON message received from the Redis queue.
@@ -93,7 +64,8 @@ class RedisQueueListener(
      *
      * @param message A JSON-formatted string representing a message to be processed.
      */
-    private fun processMessage(message: String)
+    @Async("asyncExecutor")
+    open fun processMessage(message: String)
     {
         try
         {

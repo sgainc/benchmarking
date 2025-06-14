@@ -1,15 +1,20 @@
 package application
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.boot.task.ThreadPoolTaskExecutorBuilder
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
+import org.springframework.core.task.TaskExecutor
+import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.scheduling.annotation.EnableScheduling
-import software.amazon.awssdk.services.s3.endpoints.internal.Value
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
+import java.time.Duration
+import java.util.concurrent.ThreadPoolExecutor
 
 /**
  * The main entry point for the Spring Boot application.
@@ -26,14 +31,47 @@ import java.util.concurrent.atomic.AtomicLong
  */
 @SpringBootApplication
 @EnableScheduling
+@EnableAsync
 @ComponentScan("config", "controllers", "tasks", "listeners", "data", "services")
 class Application : SpringBootServletInitializer()
 {
+	@Value("\${async.maxPoolSize:1}")
+	private var maxPoolSize : Int = 1
+
+	@Value("\${async.corePoolSize:1}")
+	private var corePoolSize : Int = 1
+
+	@Value("\${async.queueCapacity:0}")
+	private var queueCapacity : Int = 0
+
+	@Value("\${async.keepAliveSeconds:0}")
+	private var keepAliveSeconds : Int = 0
+
+	@Value("\${async.threadNamePrefix:async-thread-}")
+	private var threadNamePrefix : String = "async-thread-"
+
+
     @Bean
 	fun getState(): ApplicationState
     {
         return ApplicationState()
     }
+
+	@Bean
+	fun asyncExecutor() : TaskExecutor
+	{
+		val executor = ThreadPoolTaskExecutorBuilder()
+			.corePoolSize(corePoolSize)
+			.maxPoolSize(maxPoolSize)
+			.queueCapacity(queueCapacity)
+			.keepAlive(Duration.ofSeconds(keepAliveSeconds.toLong()))
+			.threadNamePrefix(threadNamePrefix)
+			.build()
+
+		executor.setRejectedExecutionHandler(ThreadPoolExecutor.CallerRunsPolicy())
+
+		return executor
+	}
 
 	companion object {
 
@@ -53,4 +91,3 @@ class ApplicationState
 	var eventCount : AtomicLong = AtomicLong(0)
 	var eventCountTimeStart : AtomicLong = AtomicLong(System.currentTimeMillis())
 }
-
