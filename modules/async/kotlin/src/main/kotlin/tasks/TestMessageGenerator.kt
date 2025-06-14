@@ -12,6 +12,7 @@ import dto.ReadDataMessage
 import dto.UpdateDataMessage
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.lettuce.core.api.sync.RedisCommands
+import org.springframework.context.ApplicationContext
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import kotlin.random.Random
@@ -31,9 +32,9 @@ import java.util.UUID
  * @property commands An instance of RedisCommands used to interact with the Redis database for queuing or retrieving messages.
  */
 @Component
-public open class TestMessageGenerator(
+class TestMessageGenerator(
     private val commands: RedisCommands<String, String>,
-    private val dataProvider: S3DataProvider,
+    private var dataProvider: S3DataProvider,
     private val state: ApplicationState)
 {
     private val logger = KotlinLogging.logger {}

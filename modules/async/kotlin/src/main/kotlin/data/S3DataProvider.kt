@@ -108,7 +108,7 @@ open class S3DataProvider(val s3Client: S3Client)
      *
      * @return A list of strings representing the names of objects in the S3 bucket.
      */
-    fun getObjectList() : List<String>
+    open fun getObjectList() : List<String>
     {
         val objectList = ArrayList<String>()
 
