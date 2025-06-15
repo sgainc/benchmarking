@@ -6,6 +6,15 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 
+/**
+ * A factory class for creating and providing an instance of the `ProcessingService`.
+ *
+ * This class is annotated with `@Component`, making it a Spring-managed bean. It registers
+ * a `ProcessingService` instance as a Spring Bean through the `@Bean` annotated method.
+ *
+ * @constructor Creates the factory with the given `ProcessingService` instance.
+ * @param processingService An instance of the `ProcessingService` that will be managed by this factory.
+ */
 @Component
 class ProcessingServiceFactory(private val processingService: ProcessingService)
 {

@@ -15,6 +15,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import services.ProcessingService
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 
 /**
  * Handles the processing of messages received from a Redis queue. This class uses
@@ -73,7 +74,7 @@ class RedisQueueHandler(
             val typeRef = object : TypeReference<MessageWrapper<BaseMessage>>() {}
             val wrapper = objectMapper.readValue(message, typeRef)
             val latency = System.currentTimeMillis() - wrapper.timestamp
-            logger.info { "Successfully deserialized message with latency: ${ latency}ms" }
+            logger.debug { "Successfully deserialized message with latency: ${ latency}ms" }
 
             /* Check the message type and deserialize into the correct lower level type */
             when (wrapper.messageType)
@@ -87,7 +88,10 @@ class RedisQueueHandler(
                     val data = processingService.createData(createMessage.message.dataSize)
                     dataProvider.writeDataFile(createMessage.message.dataName, data)
 
-                    logger.info { "Created new data file ${createMessage.message.dataName} size: ${createMessage.message.dataSize}" }
+                    /* Update the list of active files */
+                    state.objectList.add(createMessage.message.dataName)
+
+                    logger.debug { "Created new data file ${createMessage.message.dataName} size: ${createMessage.message.dataSize}" }
                     state.eventCount.incrementAndGet()
                 }
                 MessageType.READ_MESSAGE ->
@@ -106,7 +110,7 @@ class RedisQueueHandler(
                     val data = dataProvider.getDataFile(readMessage.message.dataName)
                     val lineCount = data.count { it == '\n' }
 
-                    logger.info { "Read file ${readMessage.message.dataName} size: ${lineCount}" }
+                    logger.debug { "Read file ${readMessage.message.dataName} size: ${lineCount}" }
                     state.eventCount.incrementAndGet()
                 }
                 MessageType.UPDATE_MESSAGE ->
@@ -123,10 +127,10 @@ class RedisQueueHandler(
 
                     /* Read the file into a string, process the string, and then resave the file */
                     var data = dataProvider.getDataFile(updateMessage.message.dataName)
-                    data = processingService.updateData(wrapper.message.dataName, updateMessage.message.original, updateMessage.message.replace)
+                    data = processingService.updateData(data, updateMessage.message.original, updateMessage.message.replace)
                     dataProvider.writeDataFile(updateMessage.message.dataName, data)
 
-                    logger.info { "Updated file ${updateMessage.message.dataName} size: ${data.length}" }
+                    logger.debug { "Updated file ${updateMessage.message.dataName} size: ${data.length}" }
                     state.eventCount.incrementAndGet()
                 }
                 MessageType.DELETE_MESSAGE ->
@@ -147,10 +151,14 @@ class RedisQueueHandler(
                     /* Then delete from data store */
                     dataProvider.deleteDataFile(deleteMessage.message.dataName)
 
-                    logger.info { "Deleted file ${deleteMessage.message.dataName}" }
+                    logger.debug { "Deleted file ${deleteMessage.message.dataName}" }
                     state.eventCount.incrementAndGet()
                 }
             }
+        }
+        catch (e: NoSuchKeyException)
+        {
+            logger.warn(e) { "Failed to find data file: $message" }
         }
         catch (e: JsonProcessingException)
         {

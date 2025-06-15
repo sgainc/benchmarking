@@ -1,6 +1,7 @@
 package listeners.redis
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.lettuce.core.api.StatefulRedisConnection
 import io.lettuce.core.api.sync.RedisCommands
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
@@ -16,7 +17,8 @@ import kotlin.concurrent.thread
  */
 @Component
 class RedisQueueListener(
-    private val commands: RedisCommands<String, String>,
+    private var commands: RedisCommands<String, String>,
+    private val connection: StatefulRedisConnection<String, String>,
     private val redisQueueHandler: RedisQueueHandler)
 {
     val logger = KotlinLogging.logger {}
@@ -51,10 +53,19 @@ class RedisQueueListener(
         {
             while (true)
             {
-                val message = commands.brpop(1, queueKey)
-                if (message != null)
+                try
                 {
-                    redisQueueHandler.processMessage(message.value)
+                    val message = commands.brpop(1, queueKey)
+                    if (message != null)
+                    {
+                        redisQueueHandler.processMessage(message.value)
+                    }
+                }
+                catch (e: Exception)
+                {
+                    //TODO: IllegalStateException: cannot be started once stopped
+                    logger.error(e) { "Failed to process message from Redis queue: ${e.message}" }
+                    commands = connection.sync()
                 }
             }
         }

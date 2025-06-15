@@ -57,6 +57,11 @@ class Application : SpringBootServletInitializer()
         return ApplicationState()
     }
 
+	/**
+	 * Creates and configures a thread pool executor for asynchronous processing.
+	 * These threads are used by the @Async annotation to process tasks asynchronously
+	 * at the methodName level.
+	 */
 	@Bean
 	fun asyncExecutor() : TaskExecutor
 	{
@@ -87,7 +92,26 @@ class Application : SpringBootServletInitializer()
 
 class ApplicationState
 {
+	/**
+	 * A set of strings representing the names of objects currently being processed by the application.
+	 * This set is used to track the progress of data processing and is updated throughout the application.
+	 *
+	 * This property is thread-safe and can be accessed from any thread.
+	 */
 	var objectList = ConcurrentHashMap.newKeySet<String>()
+
+	/**
+	 * A counter used to track the total number of events processed by the application.
+	 * This counter is updated throughout the application and can be accessed from any thread.
+	 */
+	@Volatile
 	var eventCount : AtomicLong = AtomicLong(0)
+
+	/**
+	 * A counter used to track the total time taken to process events by the application.
+	 * This counter is updated throughout the application and can be accessed from any thread.
+	 * Along with the eventCount, this value can be used to calculate the average throughput of the application..
+	 */
+	@Volatile
 	var eventCountTimeStart : AtomicLong = AtomicLong(System.currentTimeMillis())
 }

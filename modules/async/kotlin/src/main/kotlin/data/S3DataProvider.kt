@@ -7,7 +7,6 @@ import org.springframework.boot.task.ThreadPoolTaskExecutorBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.core.task.TaskExecutor
 import org.springframework.scheduling.annotation.Async
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
@@ -21,6 +20,21 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import java.time.Duration
 import java.util.concurrent.ThreadPoolExecutor
 
+
+/**
+ * A factory class for providing instances of `S3DataProvider`, which allows for interaction
+ * with Amazon S3 using an efficient and thread-safe mechanism.
+ *
+ * This class encapsulates the setup and configuration of AWS S3 client credentials, the AWS region,
+ * and thread pool configurations used for asynchronous operations.
+ *
+ * The factory utilizes thread-local storage to ensure thread isolation when creating
+ * `S3Client` and `S3DataProvider` instances.
+ *
+ * @constructor Initializes the factory with `ApplicationState` to manage application state data.
+ *
+ * @property state Represents the application state used to track progress and performance metrics.
+ */
 @Component
 class S3DataProviderFactory(private val state: ApplicationState)
 {
@@ -54,6 +68,13 @@ class S3DataProviderFactory(private val state: ApplicationState)
     private val logger = KotlinLogging.logger {}
 
 
+    /**
+     * Provides an instance of S3DataProvider from a thread-local storage.
+     * The S3DataProvider enables interaction with an S3 bucket for data operations
+     * such as retrieving, uploading, or deleting objects.
+     *
+     * @return An instance of S3DataProvider from the thread-local storage.
+     */
     @Bean
     fun getS3DataProvider(): S3DataProvider
     {
@@ -79,6 +100,14 @@ class S3DataProviderFactory(private val state: ApplicationState)
         }
     }
 
+    /**
+     * Creates and configures a `ThreadPoolTaskExecutor` bean for handling asynchronous S3 writing tasks.
+     * The executor is built with a specified core pool size, maximum pool size, queue capacity,
+     * keep-alive duration, and thread prefix. It utilizes a caller-runs policy for rejected tasks to
+     * ensure that tasks are executed in the calling thread when the executor is full.
+     *
+     * @return A configured `TaskExecutor` instance for managing S3 asynchronous write operations.
+     */
     @Bean
     private fun asyncS3WriterTaskExecutor() : TaskExecutor
     {
@@ -96,6 +125,12 @@ class S3DataProviderFactory(private val state: ApplicationState)
     }
 }
 
+/**
+ * S3DataProvider is a utility class that provides methods for interacting with an Amazon S3 bucket.
+ * It allows retrieving, uploading, and deleting objects, and performing related operations on the bucket.
+ *
+ * @property s3Client The S3Client instance used for S3 service interactions.
+ */
 open class S3DataProvider(val s3Client: S3Client)
 {
     private val bucketName = "nw2s-benchmark-data"
@@ -158,7 +193,7 @@ open class S3DataProvider(val s3Client: S3Client)
      * @param filename The name of the file to be read from the S3 bucket.
      * @return The content of the file as a string.
      */
-    fun getDataFile(filename: String): String
+    open fun getDataFile(filename: String): String
     {
         val getObjectRequest = GetObjectRequest.builder()
             .bucket(bucketName)

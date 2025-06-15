@@ -28,32 +28,26 @@
         <root level="INFO">
             <appender-ref ref="async-json"/>
         </root>
-        <logger name="application" level="DEBUG"/>
-        <logger name="data" level="DEBUG"/>
-        <logger name="dto" level="DEBUG"/>
-        <logger name="listeners" level="DEBUG"/>
-        <logger name="services" level="DEBUG"/>
-        <logger name="tasks" level="DEBUG"/>
-        <logger name="controllers" level="DEBUG"/>
-        <logger name="config" level="DEBUG"/>
+        <logger name="application" level="INFO"/>
+        <logger name="data" level="INFO"/>
+        <logger name="dto" level="INFO"/>
+        <logger name="listeners" level="INFO"/>
+        <logger name="services" level="INFO"/>
+        <logger name="tasks" level="INFO"/>
+        <logger name="controllers" level="INFO"/>
+        <logger name="config" level="INFO"/>
     </springProfile>
 
     <springProfile name="default">
         <root level="INFO">
             <appender-ref ref="async-json"/>
         </root>
-        <logger name="application" level="DEBUG"/>
-        <logger name="controllers" level="DEBUG"/>
-        <logger name="config" level="DEBUG"/>
     </springProfile>
 
     <springProfile name="dev">
         <root level="INFO">
             <appender-ref ref="async-json"/>
-        </root>
-        <logger name="application" level="DEBUG"/>
-        <logger name="controllers" level="DEBUG"/>
-        <logger name="config" level="DEBUG"/>
+        </root>v
     </springProfile>
 
 </configuration>

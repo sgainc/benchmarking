@@ -12,7 +12,6 @@ import dto.ReadDataMessage
 import dto.UpdateDataMessage
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.lettuce.core.api.sync.RedisCommands
-import org.springframework.context.ApplicationContext
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import kotlin.random.Random
@@ -41,29 +40,6 @@ class TestMessageGenerator(
     private val mapper = ObjectMapper()
 
     /**
-     * Updates the internal list of object names by fetching the latest data from the associated data provider.
-     *
-     * Functionality:
-     * - Queries the data provider for the list of objects available in the corresponding storage bucket.
-     * - Replaces the current `dataNameList` with the fetched list of object names.
-     * - Logs the updated size of the object list for monitoring purposes.
-     *
-     * Dependencies:
-     * - Accesses the `dataProvider` field to retrieve the object list.
-     * - Utilizes the `logger` field to log information related to the list update process.
-     */
-    @Scheduled(initialDelay = 5000, fixedRate = 1000)
-    public open fun updateObjectList()
-    {
-        /* Query the bucket for its list of files */
-        val dataNameList = dataProvider.getObjectList()
-        state.objectList.retainAll(dataNameList)
-        state.objectList.addAll(dataNameList)
-
-        logger.info { "Updated object list with ${dataNameList.size} items" }
-    }
-
-    /**
      * Logs the current size of the Redis queue named `benchmarkQueue` to the application logger.
      * This method is scheduled to run at fixed intervals specified by the `@Scheduled` annotation.
      *
@@ -75,7 +51,7 @@ class TestMessageGenerator(
      * - Accesses the `commands` field to execute Redis operations.
      * - Uses the `logger` field to log the queue size.
      */
-    @Scheduled(initialDelay = 10000, fixedRate = 60000)
+    @Scheduled(initialDelay = 10000, fixedRate = 10000)
     open fun logQueueSize()
     {
         val queueSize = commands.llen("benchmarkQueue")
@@ -97,14 +73,14 @@ class TestMessageGenerator(
      * - Uses the `logger` field to log information regarding the message generation process.
      */
     @Scheduled(initialDelay = 3000, fixedRate = 500)
-    open fun generateMessage()
+    fun generateMessage()
     {
         /* See how many messages are in the queue */
         val queueSize = commands.llen("benchmarkQueue")
 
-        /* If there are less than 1000 messages in the queue, generate as many as needed */
-        if (queueSize < 100) {
-            val messagesToGenerate = 100 - queueSize
+        /* If there are less than 100 messages in the queue, generate as many as needed */
+        if (queueSize < 250) {
+            val messagesToGenerate = 250 - queueSize
             logger.info { "Generating $messagesToGenerate test messages" }
 
             repeat(messagesToGenerate.toInt())
@@ -127,13 +103,19 @@ class TestMessageGenerator(
      * @return A `MessageWrapper` object containing metadata such as the message type, timestamp, and
      *         the corresponding message of type `BaseMessage`.
      */
-    open fun generateTestMessage() : MessageWrapper<BaseMessage>
+    fun generateTestMessage() : MessageWrapper<BaseMessage>
     {
         /* If we don't have any data yet, add some */
         if (state.objectList.size < 100)
         {
             val dataName = UUID.randomUUID().toString()
             return MessageWrapper(MessageType.CREATE_MESSAGE, System.currentTimeMillis(), CreateDataMessage(dataName, Random.nextInt(1000, 10000)))
+        }
+
+        /* If we have too many, then just delete some */
+        if (state.objectList.size > 1000)
+        {
+            return MessageWrapper(MessageType.DELETE_MESSAGE, System.currentTimeMillis(), DeleteDataMessage(state.objectList.random()))
         }
 
         when (Random.nextInt(0, 100))
@@ -149,9 +131,10 @@ class TestMessageGenerator(
                 val randomOriginal = String.format("%02x", Random.nextInt(0, 256))
                 val randomReplace = String.format("%02x", Random.nextInt(0, 256))
 
+                //TODO: Random can reference a removed object?!?!?!
                 return MessageWrapper(MessageType.UPDATE_MESSAGE, System.currentTimeMillis(), UpdateDataMessage(state.objectList.random(), randomOriginal, randomReplace))
             }
-            in 76..89 -> {
+            in 76..86 -> {
                 /* 25% of the time we want to create a new data item */
                 val dataName = UUID.randomUUID().toString()
                 return MessageWrapper(MessageType.CREATE_MESSAGE, System.currentTimeMillis(), CreateDataMessage(dataName, Random.nextInt(1000, 10000)))
