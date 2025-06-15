@@ -1,5 +1,5 @@
 
-# Repository Purpose: Benchmark Modules for Platform and Framework Evaluation
+# Benchmark Modules for Platform and Framework Evaluation
 
 ## Overview
 
