@@ -55,3 +55,14 @@ Contributors are encouraged to:
 * Keep results up to date with new test runs and environments
 * Document any noteworthy observations or edge cases discovered during benchmarking
 
+# Results
+## Async Message Service
+### Kotlin, @Async and Java Threads
+<img src="./results/assets/kotlin-async.png" width="50%">
+
+* 25 threads
+* 88% CPU
+* 372 messages per second
+
+I stopped at 88% CPU just to have a stake in the ground. Show me how much faster you can get and I'll push it harder!
+
