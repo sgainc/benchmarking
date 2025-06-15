@@ -64,5 +64,9 @@ Contributors are encouraged to:
 * 88% CPU
 * 372 messages per second
 
-I stopped at 88% CPU just to have a stake in the ground. Show me how much faster you can get and I'll push it harder!
+Notes: I stopped at 88% CPU just to have a stake in the ground. Show me how much faster you can get and I'll push it harder!
+Note that the default S3 provider for Java seems to have some internal code that throttles at the thread level. This is
+likely to keep the state manageable. However, this means that coroutines and loom threads are bottlenecked at the S3
+calls. To be honest, this is not horrible. I prefer the readability of simple @Async annotations and explicit threads
+created for the different workers. 
 
