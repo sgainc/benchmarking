@@ -1,4 +1,3 @@
-
 # Benchmark Modules for Platform and Framework Evaluation
 
 ## Overview
@@ -28,21 +27,31 @@ The repository supports the following objectives:
 ## Usage
 
 1. **Clone the Repository**
-   Clone the repo and navigate to the desired module directory.
+   Clone the repository and navigate to the desired module directory.
 
 2. **Install Requirements**
-   Each module includes a `requirements.txt`, `package.json`, or equivalent setup file. Follow the module’s README (if present) for environment setup.
+   Each module includes a `requirements.txt`, `package.json`, or equivalent file. Follow the setup instructions provided to configure the environment.
 
 3. **Run Benchmarks**
-   Execute the benchmark script(s) provided in the module.
+   Execute the benchmark script(s) provided in the module to produce current performance results.
 
-4. **Review Results**
-   Output data and historical results are maintained within the module directory for transparency and comparison.
+4. **Review Existing Results**
+   Historical outputs and standings are stored alongside each module for comparison.
+
+5. **Submit a New Technology or Framework**
+
+   * Choose an existing module relevant to the domain you want to benchmark (e.g., async I/O, file processing).
+   * Review the module’s requirements and operational goals.
+   * Implement your own version of the benchmark using the new technology or framework of interest.
+   * Save your implementation and results in a new subdirectory within the module.
+   * Update the module's standings with your performance metrics and submit a pull request for review.
 
 ## Contribution
 
 Contributors are encouraged to:
 
-* Add new modules for untested platforms or technologies
-* Update results with data from new environments
-* Document any discrepancies or observations during benchmarking
+* Add new modules for untested platforms or performance characteristics
+* Extend existing modules with additional implementations
+* Keep results up to date with new test runs and environments
+* Document any noteworthy observations or edge cases discovered during benchmarking
+
