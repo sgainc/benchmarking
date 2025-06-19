@@ -2,6 +2,7 @@ package main
 
 import (
 	"benchmark_async/app"
+	"benchmark_async/data"
 	"benchmark_async/endpoints/test"
 	"benchmark_async/tasks"
 	"github.com/go-co-op/gocron/v2"
@@ -20,11 +21,12 @@ func main() {
 
 		fx.Provide(
 			app.NewHTTPServer,
+			data.NewRedisProvider,
 			fx.Annotate(app.NewScheduler, fx.ParamTags(`group:"tasks"`)),
 			fx.Annotate(app.NewServeMux, fx.ParamTags(`group:"routes"`)),
 			app.AsRoute(testEndpoints.NewAppStateEndpoint),
 			app.AsRoute(testEndpoints.NewIsUpEndpoint),
-			app.AsScheduledTask(tasks.NewHelloTask),
+			app.AsScheduledTask(tasks.NewInstrumentationTask),
 			zap.NewProduction,
 		),
 
