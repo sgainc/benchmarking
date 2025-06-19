@@ -27,6 +27,7 @@ func main() {
 			app.AsRoute(testEndpoints.NewAppStateEndpoint),
 			app.AsRoute(testEndpoints.NewIsUpEndpoint),
 			app.AsScheduledTask(tasks.NewInstrumentationTask),
+			app.AsScheduledTask(tasks.NewMessageGeneratorTask),
 			zap.NewProduction,
 		),
 
