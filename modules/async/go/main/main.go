@@ -20,6 +20,7 @@ func main() {
 		}),
 
 		fx.Provide(
+			app.NewAppState,
 			app.NewHTTPServer,
 			data.NewRedisProvider,
 			fx.Annotate(app.NewScheduler, fx.ParamTags(`group:"tasks"`)),

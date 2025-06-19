@@ -9,37 +9,33 @@ const (
 	UPDATE_MESSAGE MessageType = "UPDATE_MESSAGE"
 )
 
-type BaseMessage struct {
+type ReadDataMessage struct {
 	DataName string
 }
 
 type CreateDataMessage struct {
-	BaseMessage
+	DataName string
 	DataSize int
 }
 
-type ReadDataMessage struct {
-	BaseMessage
-}
-
 type UpdateDataMessage struct {
-	BaseMessage
+	DataName string
 	Original string
 	Replace  string
 }
 
 type DeleteDataMessage struct {
-	BaseMessage
+	DataName string
 }
 
-type MessageWrapper[T any] struct {
+type MessageWrapper struct {
 	MessageType MessageType
 	Timestamp   int64
-	Message     T
+	Message     any
 }
 
-func NewMessageWrapper[T any](messageType MessageType, timestamp int64, message T) MessageWrapper[T] {
-	return MessageWrapper[T]{
+func NewMessageWrapper(messageType MessageType, timestamp int64, message any) MessageWrapper {
+	return MessageWrapper{
 		MessageType: messageType,
 		Timestamp:   timestamp,
 		Message:     message,
@@ -48,27 +44,27 @@ func NewMessageWrapper[T any](messageType MessageType, timestamp int64, message 
 
 func NewCreateDataMessage(dataName string, dataSize int) CreateDataMessage {
 	return CreateDataMessage{
-		BaseMessage: BaseMessage{DataName: dataName},
-		DataSize:    dataSize,
+		DataName: dataName,
+		DataSize: dataSize,
 	}
 }
 
 func NewReadDataMessage(dataName string) ReadDataMessage {
 	return ReadDataMessage{
-		BaseMessage: BaseMessage{DataName: dataName},
+		DataName: dataName,
 	}
 }
 
 func NewUpdateDataMessage(dataName string, original string, replace string) UpdateDataMessage {
 	return UpdateDataMessage{
-		BaseMessage: BaseMessage{DataName: dataName},
-		Original:    original,
-		Replace:     replace,
+		DataName: dataName,
+		Original: original,
+		Replace:  replace,
 	}
 }
 
 func NewDeleteDataMessage(dataName string) DeleteDataMessage {
 	return DeleteDataMessage{
-		BaseMessage: BaseMessage{DataName: dataName},
+		DataName: dataName,
 	}
 }
