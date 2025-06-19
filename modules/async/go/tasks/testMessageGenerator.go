@@ -13,6 +13,7 @@ import (
 	"time"
 )
 
+// NewMessageGeneratorTask creates and initializes a MessageGeneratorTask with provided RedisProvider, logger, and AppState.
 func NewMessageGeneratorTask(redis *data.RedisProvider, log *zap.Logger, state *app.AppState) app.ScheduledTask {
 	return &MessageGeneratorTask{
 		redis:   redis,
@@ -22,6 +23,10 @@ func NewMessageGeneratorTask(redis *data.RedisProvider, log *zap.Logger, state *
 	}
 }
 
+// MessageGeneratorTask represents a scheduled task for managing message generation and transmission to a Redis queue.
+// It interacts with a Redis provider, application state, and a logger to generate, queue, and log messages accordingly.
+// The task ensures that the queue maintains a minimum number of messages by generating additional messages as needed.
+// This task executes at a defined interval and facilitates CRUD operations via generated message types.
 type MessageGeneratorTask struct {
 	redis   *data.RedisProvider
 	log     *zap.Logger
@@ -29,14 +34,19 @@ type MessageGeneratorTask struct {
 	context context.Context
 }
 
+// Interval returns the execution interval for the MessageGeneratorTask as a time.Duration, set to 500 milliseconds.
 func (*MessageGeneratorTask) Interval() time.Duration {
 	return time.Millisecond * 500
 }
 
+// Task creates and returns a gocron.Task instance that wraps the message generation task logic for scheduling purposes.
 func (h *MessageGeneratorTask) Task() gocron.Task {
 	return gocron.NewTask(h.messageGeneratorTask)
 }
 
+// messageGeneratorTask ensures the Redis queue maintains at least 1000 messages by generating and enqueuing additional ones.
+// It calculates the deficit, generates new messages using generateTestMessage, and pushes them to the queue using redis.SendMessage.
+// Logs errors during queue operations and generates informational logs for message generation events.
 func (h *MessageGeneratorTask) messageGeneratorTask() {
 
 	ctx := context.Background()
@@ -62,6 +72,8 @@ func (h *MessageGeneratorTask) messageGeneratorTask() {
 	}
 }
 
+// generateTestMessage generates and returns a new message of type MessageWrapper based on the
+// internal state and logic rules.
 func (h *MessageGeneratorTask) generateTestMessage() *types.MessageWrapper {
 
 	if h.state.ObjectList.Count() < 100 {
