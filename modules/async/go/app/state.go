@@ -29,5 +29,5 @@ func (state *AppState) GetRateAndReset() float64 {
 	count := atomic.SwapInt64(&state.eventCount, 0)
 	timeThen := atomic.SwapInt64(&state.eventCountTimeStart, timeNow)
 
-	return float64(count) / float64(timeThen)
+	return 1000.0 * float64(count) / float64(timeNow-timeThen)
 }

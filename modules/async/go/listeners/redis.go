@@ -5,6 +5,7 @@ import (
 	"benchmark_async/data"
 	"benchmark_async/types"
 	"context"
+	"github.com/mitchellh/mapstructure"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
@@ -52,7 +53,7 @@ func (listener *RedisListener) messageListener(ctx context.Context) {
 		}
 
 		listener.log.Debug("Received message", zap.Any("message", message))
-
+		listener.messageHandler(message)
 	}
 }
 
@@ -60,11 +61,17 @@ func (listener *RedisListener) messageHandler(message types.MessageWrapper) {
 
 	// Check the message type and cast to the correct type.
 	switch message.MessageType {
-	case "CREATE_MESSAGE":
-		createMessage := message.Message.(*types.CreateDataMessage)
+	case types.CREATE_MESSAGE:
+		var createMessage types.CreateDataMessage
+		err := mapstructure.Decode(message.Message, &createMessage)
+		if err != nil {
+			listener.log.Error("Failed to decode message", zap.Error(err))
+			return
+		}
 
 		//TODO: write datafile to S3
 		listener.state.ObjectList.SetIfAbsent(createMessage.DataName, true)
 		listener.log.Debug("Created data file", zap.String("dataName", createMessage.DataName))
+		listener.state.IncrementEventCount()
 	}
 }
