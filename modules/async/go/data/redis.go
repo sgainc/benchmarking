@@ -22,14 +22,14 @@ func (p *RedisProvider) SendMessage(ctx context.Context, message *types.MessageW
 		return err
 	}
 
-	return p.redisClient.LPush(ctx, "benchmarkQueue-go", jsonData).Err()
+	return p.redisClient.LPush(context.Background(), "benchmarkQueue-go", jsonData).Err()
 
 }
 
 // ReceiveMessage retrieves and unmarshals the next message from the Redis "benchmarkQueue" using blocking pop operation.
 func (p *RedisProvider) ReceiveMessage(ctx context.Context) (types.MessageWrapper, error) {
 
-	result, err := p.redisClient.BRPop(ctx, 0, "benchmarkQueue-go").Result()
+	result, err := p.redisClient.BRPop(context.Background(), 0, "benchmarkQueue-go").Result()
 	if err != nil {
 		p.log.Error("Error receiving message", zap.Error(err))
 		return types.MessageWrapper{}, err

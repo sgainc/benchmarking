@@ -7,11 +7,13 @@ import (
 	"go.uber.org/zap"
 )
 
+// RedisListener listens for messages on a Redis queue and processes them using a message listener mechanism.
 type RedisListener struct {
 	redisProvider *data.RedisProvider
 	log           *zap.Logger
 }
 
+// NewRedisListener creates and initializes a RedisListener and integrates it into the Fx application lifecycle.
 func NewRedisListener(redisProvider *data.RedisProvider, log *zap.Logger, lc fx.Lifecycle) *RedisListener {
 
 	listener := &RedisListener{
@@ -35,7 +37,7 @@ func NewRedisListener(redisProvider *data.RedisProvider, log *zap.Logger, lc fx.
 func (listener *RedisListener) messageListener(ctx context.Context) {
 
 	for {
-		message, err := listener.redisProvider.ReceiveMessage(ctx)
+		message, err := listener.redisProvider.ReceiveMessage(context.Background())
 		if err != nil {
 			listener.log.Error("Failed to receive message", zap.Error(err))
 			continue
