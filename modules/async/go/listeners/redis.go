@@ -1,7 +1,9 @@
 package listeners
 
 import (
+	"benchmark_async/app"
 	"benchmark_async/data"
+	"benchmark_async/types"
 	"context"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -11,14 +13,20 @@ import (
 type RedisListener struct {
 	redisProvider *data.RedisProvider
 	log           *zap.Logger
+	state         *app.AppState
 }
 
 // NewRedisListener creates and initializes a RedisListener and integrates it into the Fx application lifecycle.
-func NewRedisListener(redisProvider *data.RedisProvider, log *zap.Logger, lc fx.Lifecycle) *RedisListener {
+func NewRedisListener(
+	redisProvider *data.RedisProvider,
+	log *zap.Logger,
+	state *app.AppState,
+	lc fx.Lifecycle) *RedisListener {
 
 	listener := &RedisListener{
 		redisProvider: redisProvider,
 		log:           log,
+		state:         state,
 	}
 
 	lc.Append(fx.Hook{
@@ -43,6 +51,20 @@ func (listener *RedisListener) messageListener(ctx context.Context) {
 			continue
 		}
 
-		listener.log.Info("Received message", zap.Any("message", message))
+		listener.log.Debug("Received message", zap.Any("message", message))
+
+	}
+}
+
+func (listener *RedisListener) messageHandler(message types.MessageWrapper) {
+
+	// Check the message type and cast to the correct type.
+	switch message.MessageType {
+	case "CREATE_MESSAGE":
+		createMessage := message.Message.(*types.CreateDataMessage)
+
+		//TODO: write datafile to S3
+		listener.state.ObjectList.SetIfAbsent(createMessage.DataName, true)
+		listener.log.Debug("Created data file", zap.String("dataName", createMessage.DataName))
 	}
 }

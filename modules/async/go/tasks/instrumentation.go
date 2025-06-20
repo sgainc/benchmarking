@@ -10,10 +10,11 @@ import (
 )
 
 // NewInstrumentationTask creates a new InstrumentationTask, initializing RedisProvider, logger, and context settings.
-func NewInstrumentationTask(redis *data.RedisProvider, log *zap.Logger) app.ScheduledTask {
+func NewInstrumentationTask(redis *data.RedisProvider, log *zap.Logger, state *app.AppState) app.ScheduledTask {
 	return &InstrumentationTask{
 		redis:   redis,
 		log:     log,
+		state:   state,
 		context: context.Background(),
 	}
 }
@@ -22,12 +23,13 @@ func NewInstrumentationTask(redis *data.RedisProvider, log *zap.Logger) app.Sche
 type InstrumentationTask struct {
 	redis   *data.RedisProvider
 	log     *zap.Logger
+	state   *app.AppState
 	context context.Context
 }
 
 // Interval returns the default time duration for scheduling instrumentation tasks, which is set to 5 seconds.
 func (*InstrumentationTask) Interval() time.Duration {
-	return time.Second * 5
+	return time.Second * 10
 }
 
 // Task creates and returns a new gocron.Task for executing the instrumentation task at scheduled intervals.
@@ -46,4 +48,5 @@ func (h *InstrumentationTask) instrumentationTask() {
 	}
 
 	h.log.Info("Current queue length", zap.Int64("length", queueLen))
+	h.log.Info("Event count per second", zap.Float64("count", h.state.GetRateAndReset()))
 }
